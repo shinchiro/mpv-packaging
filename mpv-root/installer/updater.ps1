@@ -74,7 +74,7 @@ function Get-Arch {
 }
 
 function ExtractGitFromFile {
-    $stripped = .\mpv | select-string "mpv git"
+    $stripped = .\mpv --no-config | select-string "mpv git"
     $pattern = "mpv ([a-z0-9-]+.)\B"
     $bool = $stripped -match $pattern
     return $matches[1]
