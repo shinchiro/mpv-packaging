@@ -133,7 +133,7 @@ function Upgrade-Mpv {
         $remoteName = Get-Latest-Mpv $arch
         if ((ExtractGitFromFile) -match (ExtractGitFromURL $remoteName))
         {
-            Write-Host "You are already using latest mpv build ($remoteName)" -ForegroundColor Green
+            Write-Host "You are already using latest mpv build -- $remoteName" -ForegroundColor Green
             $need_download = $false
         }
         else {
@@ -160,7 +160,7 @@ function Upgrade-Youtubedl {
 
     if (Check-Youtubedl) {
         if ((.\youtube-dl --version) -match ($latest_release)) {
-            Write-Host "You are already using latest youtube-dl ($latest_release)" -ForegroundColor Green
+            Write-Host "You are already using latest youtube-dl -- $latest_release" -ForegroundColor Green
             $need_download = $false
         }
         else {
