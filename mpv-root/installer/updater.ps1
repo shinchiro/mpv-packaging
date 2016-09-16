@@ -127,6 +127,7 @@ function Test-Admin
 function Upgrade-Mpv {
     $need_download = $false
     $remoteName = ""
+    $arch = ""
 
     if (Check-Mpv) {
         $arch = (Get-Arch).FileType
@@ -143,8 +144,15 @@ function Upgrade-Mpv {
     }
     else {
         $need_download = $true
-        Write-Host "Assuming System Type is 64-bit" -ForegroundColor Magenta
-        $remoteName = Get-Latest-Mpv "x86_64"
+        if (Test-Path (Join-Path $env:windir "SysWow64")) {
+            Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
+            $arch = "x86_64"
+        }
+        else {
+            Write-Host "Detecting System Type is 32-bit" -ForegroundColor Green
+            $arch = "i686"
+        }
+        $remoteName = Get-Latest-Mpv $arch
     }
 
     if ($need_download) {
