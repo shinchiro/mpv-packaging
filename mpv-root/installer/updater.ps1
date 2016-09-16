@@ -3,16 +3,16 @@ function Check-7z {
     if (-not (Test-Path ($7zdir + "\7za.exe")))
     {
         $download_file = (Get-Location).Path + "\7z.zip"
-        Write-Host "Downloading 7z" -foregroundcolor green
+        Write-Host "Downloading 7z" -ForegroundColor Green
         Invoke-WebRequest -Uri "http://download.sourceforge.net/sevenzip/7za920.zip" -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $download_file
+        Write-Host "Extracting 7z" -ForegroundColor Green
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        Write-Host "Extracting 7z" -foregroundcolor green
         [System.IO.Compression.ZipFile]::ExtractToDirectory($download_file, $7zdir)
         Remove-Item -Force $download_file
     }
     else
     {
-        Write-Host "7z already exist. Skipped download" -ForegroundColor green
+        Write-Host "7z already exist. Skipped download" -ForegroundColor Green
     }
 }
 
@@ -198,6 +198,7 @@ else {
 try {
     Upgrade-Mpv
     Upgrade-Youtubedl
+    Write-Host "Operation completed" -ForegroundColor Magenta
 }
 catch [System.Exception] {
     Write-Host $_.Exception.Message -ForegroundColor Red
