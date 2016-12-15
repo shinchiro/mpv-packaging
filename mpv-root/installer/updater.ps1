@@ -16,6 +16,16 @@ function Check-7z {
     }
 }
 
+function Check-PowershellVersion {
+    $version = $PSVersionTable.PSVersion.Major
+    Write-Host "Verifying Windows PowerShell version -- $version" -ForegroundColor Green
+    if ($version -le 2)
+    {
+        Write-Host "Using Windows PowerShell $version is unsupported. Upgrade your Windows PowerShell." -ForegroundColor Red
+        throw
+    }
+}
+
 function Check-Youtubedl {
     $youtubedl = (Get-Location).Path + "\youtube-dl.exe"
     $is_exist = Test-Path $youtubedl
@@ -196,6 +206,7 @@ else {
 }
 
 try {
+    Check-PowershellVersion
     Upgrade-Mpv
     Upgrade-Youtubedl
     Write-Host "Operation completed" -ForegroundColor Magenta
