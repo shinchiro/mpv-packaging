@@ -18,7 +18,7 @@ function Check-7z {
 
 function Check-PowershellVersion {
     $version = $PSVersionTable.PSVersion.Major
-    Write-Host "Verifying Windows PowerShell version -- $version" -ForegroundColor Green
+    Write-Host "Checking Windows PowerShell version -- $version" -ForegroundColor Green
     if ($version -le 2)
     {
         Write-Host "Using Windows PowerShell $version is unsupported. Upgrade your Windows PowerShell." -ForegroundColor Red
