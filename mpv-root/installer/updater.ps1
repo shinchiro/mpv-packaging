@@ -116,7 +116,7 @@ function Get-Arch {
 }
 
 function ExtractGitFromFile {
-    $stripped = .\mpv --no-config | select-string "mpv git"
+    $stripped = .\mpv --no-config | select-string "mpv" | select-object -First 1
     $pattern = "-?(git-[a-z0-9-]{7})"
     $bool = $stripped -match $pattern
     return $matches[1]
