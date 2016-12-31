@@ -76,7 +76,7 @@ function Get-Latest-Mpv($Arch) {
     $result = [xml](New-Object System.Net.WebClient).DownloadString($link)
     $latest = $result.rss.channel.item.link[0]
     $filename = $latest.split("/")[-2]
-    return $filename
+    return [System.Uri]::UnescapeDataString($filename)
 }
 
 function Get-Latest-Youtubedl {
