@@ -117,13 +117,13 @@ function Get-Arch {
 
 function ExtractGitFromFile {
     $stripped = .\mpv --no-config | select-string "mpv" | select-object -First 1
-    $pattern = "-?(git-[a-z0-9-]{7})"
+    $pattern = "-g([a-z0-9-]{7})"
     $bool = $stripped -match $pattern
     return $matches[1]
 }
 
 function ExtractGitFromURL($filename) {
-    $pattern = "-?(git-[a-z0-9-]{7})"
+    $pattern = "-git-([a-z0-9-]{7})"
     $bool = $filename -match $pattern
     return $matches[1]
 }
