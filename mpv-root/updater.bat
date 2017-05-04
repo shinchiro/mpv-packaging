@@ -5,4 +5,4 @@ if exist "%~dp0\installer\updater.ps1" (
 ) else (
     set updater_script="%~dp0\updater.ps1"
 )
-powershell -noexit -executionpolicy bypass -File %updater_script%
+powershell -noprofile -nologo -noexit -executionpolicy bypass -File %updater_script%
