@@ -33,7 +33,7 @@ set /P enterKey={ENTER}
 
 mkdir "%config_dir%"
 echo # High quality video rendering for fast computer. > "%config_file%"
-echo profile=opengl-hq >> "%config_file%"
+echo profile=gpu-hq >> "%config_file%"
 
 :die
 	if not [%1] == [] echo %~1
