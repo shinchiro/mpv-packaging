@@ -29,18 +29,12 @@ function Check-PowershellVersion {
 function Check-Youtubedl {
     $youtubedl = (Get-Location).Path + "\youtube-dl.exe"
     $is_exist = Test-Path $youtubedl
-    if (-not $is_exist) {
-        Write-Host "youtube-dl doesn't exist" -ForegroundColor Cyan
-    }
     return $is_exist
 }
 
 function Check-Mpv {
     $mpv = (Get-Location).Path + "\mpv.exe"
     $is_exist = Test-Path $mpv
-    if (-not $is_exist) {
-        Write-Host "mpv doesn't exist" -ForegroundColor Cyan
-    }
     return $is_exist
 }
 
@@ -153,16 +147,25 @@ function Upgrade-Mpv {
         }
     }
     else {
-        $need_download = $true
-        if (Test-Path (Join-Path $env:windir "SysWow64")) {
-            Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
-            $arch = "x86_64"
+        Write-Host "mpv doesn't exist. " -ForegroundColor Cyan -NoNewline
+        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=y)" "y"
+        Write-Host ""
+
+        if ($result -match 'y') {
+            $need_download = $true
+            if (Test-Path (Join-Path $env:windir "SysWow64")) {
+                Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
+                $arch = "x86_64"
+            }
+            else {
+                Write-Host "Detecting System Type is 32-bit" -ForegroundColor Green
+                $arch = "i686"
+            }
+            $remoteName = Get-Latest-Mpv $arch
         }
         else {
-            Write-Host "Detecting System Type is 32-bit" -ForegroundColor Green
-            $arch = "i686"
+            $need_download = $false
         }
-        $remoteName = Get-Latest-Mpv $arch
     }
 
     if ($need_download) {
@@ -187,12 +190,46 @@ function Upgrade-Youtubedl {
         }
     }
     else {
-        $need_download = $true
+        Write-Host "youtube-dl doesn't exist. " -ForegroundColor Cyan -NoNewline
+        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=n)" "n"
+        Write-Host ""
+
+        if ($result -match 'y') {
+            $need_download = $true
+        }
+        else {
+            $need_download = $false
+        }
     }
 
     if ($need_download) {
         Download-Youtubedl $latest_release
     }
+}
+
+function Read-KeyOrTimeout ($prompt, $key){
+    $seconds = 4
+    $startTime = Get-Date
+    $timeOut = New-TimeSpan -Seconds $seconds
+
+    Write-Host "$prompt " -ForegroundColor Cyan
+
+    while (-not $host.ui.RawUI.KeyAvailable) {
+        $currentTime = Get-Date
+        Start-Sleep -s 1
+        Write-Host "#" -ForegroundColor Cyan -NoNewline
+        if ($currentTime -gt $startTime + $timeOut) {
+            Break
+        }
+    }
+    if ($host.ui.RawUI.KeyAvailable) {
+        [string]$response = ($host.ui.RawUI.ReadKey("IncludeKeyDown,NoEcho")).character
+    }
+    else {
+        [string]$response = $key
+    }
+    $char = $response.ToLower()
+    return $char
 }
 
 #
