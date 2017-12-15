@@ -148,10 +148,10 @@ function Upgrade-Mpv {
     }
     else {
         Write-Host "mpv doesn't exist. " -ForegroundColor Cyan -NoNewline
-        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=y)" "y"
+        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=y)" "Y"
         Write-Host ""
 
-        if ($result -match 'y') {
+        if ($result -eq "Y") {
             $need_download = $true
             if (Test-Path (Join-Path $env:windir "SysWow64")) {
                 Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
@@ -191,10 +191,10 @@ function Upgrade-Youtubedl {
     }
     else {
         Write-Host "youtube-dl doesn't exist. " -ForegroundColor Cyan -NoNewline
-        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=n)" "n"
+        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=n)" "N"
         Write-Host ""
 
-        if ($result -match 'y') {
+        if ($result -eq 'Y') {
             $need_download = $true
         }
         else {
@@ -214,7 +214,7 @@ function Read-KeyOrTimeout ($prompt, $key){
 
     Write-Host "$prompt " -ForegroundColor Cyan
 
-    while (-not $host.ui.RawUI.KeyAvailable) {
+    while (-not [System.Console]::KeyAvailable) {
         $currentTime = Get-Date
         Start-Sleep -s 1
         Write-Host "#" -ForegroundColor Cyan -NoNewline
@@ -222,14 +222,13 @@ function Read-KeyOrTimeout ($prompt, $key){
             Break
         }
     }
-    if ($host.ui.RawUI.KeyAvailable) {
-        [string]$response = ($host.ui.RawUI.ReadKey("IncludeKeyDown,NoEcho")).character
+    if ([System.Console]::KeyAvailable) {
+        $response = [System.Console]::ReadKey($true).Key
     }
     else {
-        [string]$response = $key
+        $response = $key
     }
-    $char = $response.ToLower()
-    return $char
+    return $response.ToString()
 }
 
 #
