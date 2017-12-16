@@ -208,7 +208,7 @@ function Upgrade-Youtubedl {
 }
 
 function Read-KeyOrTimeout ($prompt, $key){
-    $seconds = 4
+    $seconds = 9
     $startTime = Get-Date
     $timeOut = New-TimeSpan -Seconds $seconds
 
