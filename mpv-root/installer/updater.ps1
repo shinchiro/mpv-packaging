@@ -217,7 +217,7 @@ function Read-KeyOrTimeout ($prompt, $key){
     # Basic progress bar
     [Console]::CursorLeft = 0
     [Console]::Write("[")
-    [Console]::CursorLeft = $seconds + 1
+    [Console]::CursorLeft = $seconds + 2
     [Console]::Write("]")
     [Console]::CursorLeft = 1
 
