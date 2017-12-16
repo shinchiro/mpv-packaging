@@ -214,6 +214,13 @@ function Read-KeyOrTimeout ($prompt, $key){
 
     Write-Host "$prompt " -ForegroundColor Cyan
 
+    # Basic progress bar
+    [Console]::CursorLeft = 0
+    [Console]::Write("[")
+    [Console]::CursorLeft = $seconds + 1
+    [Console]::Write("]")
+    [Console]::CursorLeft = 1
+
     while (-not [System.Console]::KeyAvailable) {
         $currentTime = Get-Date
         Start-Sleep -s 1
