@@ -147,7 +147,7 @@ function Upgrade-Mpv {
         }
     }
     else {
-        Write-Host "mpv doesn't exist. " -ForegroundColor Cyan -NoNewline
+        Write-Host "mpv doesn't exist. " -ForegroundColor Green -NoNewline
         $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=y)" "Y"
         Write-Host ""
 
@@ -190,7 +190,7 @@ function Upgrade-Youtubedl {
         }
     }
     else {
-        Write-Host "youtube-dl doesn't exist. " -ForegroundColor Cyan -NoNewline
+        Write-Host "youtube-dl doesn't exist. " -ForegroundColor Green -NoNewline
         $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=n)" "N"
         Write-Host ""
 
@@ -212,7 +212,7 @@ function Read-KeyOrTimeout ($prompt, $key){
     $startTime = Get-Date
     $timeOut = New-TimeSpan -Seconds $seconds
 
-    Write-Host "$prompt " -ForegroundColor Cyan
+    Write-Host "$prompt " -ForegroundColor Green
 
     # Basic progress bar
     [Console]::CursorLeft = 0
@@ -224,7 +224,7 @@ function Read-KeyOrTimeout ($prompt, $key){
     while (-not [System.Console]::KeyAvailable) {
         $currentTime = Get-Date
         Start-Sleep -s 1
-        Write-Host "#" -ForegroundColor Cyan -NoNewline
+        Write-Host "#" -ForegroundColor Green -NoNewline
         if ($currentTime -gt $startTime + $timeOut) {
             Break
         }
