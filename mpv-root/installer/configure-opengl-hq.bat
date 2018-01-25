@@ -34,8 +34,9 @@ set /P enterKey={ENTER}
 mkdir "%config_dir%"
 echo # High quality video rendering for fast computer. > "%config_file%"
 echo profile=gpu-hq >> "%config_file%"
+echo deband=no >> "%config_file%"
 
 :die
-	if not [%1] == [] echo %~1
-	pause
-	exit 1
+    if not [%1] == [] echo %~1
+    pause
+    exit 1
