@@ -250,6 +250,8 @@ else {
 
 try {
     Check-PowershellVersion
+    # Sourceforge only support TLS 1.2
+    [Net.ServicePointManager]::SecurityProtocol = [System.Security.Authentication.SslProtocols] "tls, tls11, tls12"
     Upgrade-Mpv
     Upgrade-Youtubedl
     Write-Host "Operation completed" -ForegroundColor Magenta
