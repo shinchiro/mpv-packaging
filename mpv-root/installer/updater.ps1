@@ -54,7 +54,6 @@ function Extract-Mpv ($file) {
     $7za = (Get-Location).Path + "\7z\7za.exe"
     Write-Host "Extracting" $file -ForegroundColor Green
     & $7za x -y $file
-    Remove-Item -Force $file
 }
 
 function Get-Latest-Mpv($Arch) {
