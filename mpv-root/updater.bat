@@ -12,6 +12,4 @@ powershell -noprofile -nologo -executionpolicy bypass -File %updater_script%
 if exist "%~dp0\installer\updater.ps1" if exist "%~dp0\updater.ps1" (
     del "%~dp0\updater.ps1"
 )
-echo press any key to EXIT
-pause >nul
-exit
+@pause
