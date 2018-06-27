@@ -174,7 +174,7 @@ call :add_type ""                                 "audio" "CUE Sheet"           
 :: Register "Default Programs" entry
 call :reg add "HKLM\SOFTWARE\RegisteredApplications" /v "mpv" /d "SOFTWARE\Clients\Media\mpv\Capabilities" /f
 
-:: Add mpv start menu shortcut
+:: Add start menu shortcut
 %SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\mpv.lnk');$s.TargetPath='%mpv_path%';$s.Save()"
 
 echo.
