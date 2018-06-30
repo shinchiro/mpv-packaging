@@ -55,6 +55,9 @@ for /f "usebackq eol= delims=" %%k in (`reg query "%classes_root_key%" /f "io.mp
 	)
 )
 
+:: Delete start menu link
+del "%ProgramData%\Microsoft\Windows\Start Menu\Programs\mpv.lnk"
+
 echo Uninstalled successfully
 if [%unattended%] == [yes] exit 0
 pause

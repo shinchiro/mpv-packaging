@@ -1,6 +1,6 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-path %SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem
+path %SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0\
 
 :: Unattended install flag. When set, the script will not require user input.
 set unattended=no
@@ -173,6 +173,9 @@ call :add_type ""                                 "audio" "CUE Sheet"           
 
 :: Register "Default Programs" entry
 call :reg add "HKLM\SOFTWARE\RegisteredApplications" /v "mpv" /d "SOFTWARE\Clients\Media\mpv\Capabilities" /f
+
+:: Add start menu link
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%ProgramData%\Microsoft\Windows\Start Menu\Programs\mpv.lnk');$s.TargetPath='%mpv_path%';$s.Save()"
 
 echo.
 echo Installed successfully^^! You can now configure mpv's file associations in the
