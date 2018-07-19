@@ -129,7 +129,7 @@ function ExtractDateFromFile {
     return "$year$month$day"
 }
 
-function ExtractDateFromURL {
+function ExtractDateFromURL($filename) {
     $pattern = "mpv-[xi864_]*-([0-9]{8})-git-([a-z0-9-]{7})"
     $bool = $filename -match $pattern
     return $matches[1]
@@ -149,7 +149,8 @@ function Upgrade-Mpv {
     if (Check-Mpv) {
         $arch = (Get-Arch).FileType
         $remoteName = Get-Latest-Mpv $arch
-        if ((ExtractGitFromFile) -match (ExtractGitFromURL $remoteName))
+        if ((ExtractGitFromFile -match (ExtractGitFromURL $remoteName)) -and
+            (ExtractDateFromFile -match (ExtractDateFromURL $remoteName)))
         {
             Write-Host "You are already using latest mpv build -- $remoteName" -ForegroundColor Green
             $need_download = $false
