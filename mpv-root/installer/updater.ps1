@@ -121,6 +121,20 @@ function ExtractGitFromURL($filename) {
     return $matches[1]
 }
 
+function ExtractDateFromFile {
+    $date = (Get-Item ./mpv.exe).LastWriteTimeUtc
+    $day = $date.Day.ToString("00")
+    $month = $date.Month.ToString("00")
+    $year = $date.Year.ToString("0000")
+    return "$year$month$day"
+}
+
+function ExtractDateFromURL {
+    $pattern = "mpv-[xi864_]*-([0-9]{8})-git-([a-z0-9-]{7})"
+    $bool = $filename -match $pattern
+    return $matches[1]
+}
+
 function Test-Admin
 {
     $user = [Security.Principal.WindowsIdentity]::GetCurrent();
