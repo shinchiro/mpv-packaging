@@ -126,8 +126,8 @@ function ExtractDateFromFile {
     $day = $date.Day.ToString("00")
     $month = $date.Month.ToString("00")
     $year = $date.Year.ToString("0000")
-    return "$year$month$day"
-}
+    $fulldate = "$year$month$day"
+    return $fulldate}
 
 function ExtractDateFromURL($filename) {
     $pattern = "mpv-[xi864_]*-([0-9]{8})-git-([a-z0-9-]{7})"
