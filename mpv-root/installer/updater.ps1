@@ -126,8 +126,8 @@ function ExtractDateFromFile {
     $day = $date.Day.ToString("00")
     $month = $date.Month.ToString("00")
     $year = $date.Year.ToString("0000")
-    $fulldate = "$year$month$day"
-    return $fulldate}
+    return "$year$month$day"
+}
 
 function ExtractDateFromURL($filename) {
     $pattern = "mpv-[xi864_]*-([0-9]{8})-git-([a-z0-9-]{7})"
@@ -149,11 +149,21 @@ function Upgrade-Mpv {
     if (Check-Mpv) {
         $arch = (Get-Arch).FileType
         $remoteName = Get-Latest-Mpv $arch
-        if ((ExtractGitFromFile -match (ExtractGitFromURL $remoteName)) -and
-            (ExtractDateFromFile -match (ExtractDateFromURL $remoteName)))
+        $localgit = ExtractGitFromFile
+        $localdate = ExtractDateFromFile
+        $remotegit = ExtractGitFromURL $remoteName
+        $remotedate = ExtractDateFromURL $remoteName
+        if ($localgit -match $remotegit)
         {
-            Write-Host "You are already using latest mpv build -- $remoteName" -ForegroundColor Green
-            $need_download = $false
+            if ($localdate -match $remotedate)
+            {
+                Write-Host "You are already using latest mpv build -- $remoteName" -ForegroundColor Green
+                $need_download = $false
+            }
+            else {
+                Write-Host "Newer mpv build available" -ForegroundColor Green
+                $need_download = $true
+            }
         }
         else {
             Write-Host "Newer mpv build available" -ForegroundColor Green
