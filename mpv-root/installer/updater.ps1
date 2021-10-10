@@ -204,18 +204,8 @@ function Upgrade-Mpv {
 }
 
 function Upgrade-Youtubedl {
-    $need_download = $false
-    $latest_release = Get-Latest-Youtubedl
-
     if (Check-Youtubedl) {
-        if ((.\youtube-dl --version) -match ($latest_release)) {
-            Write-Host "You are already using latest youtube-dl -- $latest_release" -ForegroundColor Green
-            $need_download = $false
-        }
-        else {
-            Write-Host "Newer youtube-dl build available" -ForegroundColor Green
-            $need_download = $true
-        }
+        .\youtube-dl --update
     }
     else {
         Write-Host "youtube-dl doesn't exist. " -ForegroundColor Green -NoNewline
@@ -223,15 +213,9 @@ function Upgrade-Youtubedl {
         Write-Host ""
 
         if ($result -eq 'Y') {
-            $need_download = $true
+            $latest_release = Get-Latest-Youtubedl
+            Download-Youtubedl $latest_release
         }
-        else {
-            $need_download = $false
-        }
-    }
-
-    if ($need_download) {
-        Download-Youtubedl $latest_release
     }
 }
 
