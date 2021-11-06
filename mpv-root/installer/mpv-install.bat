@@ -20,9 +20,9 @@ cd /D %~dp0\..
 set mpv_path=%cd%\mpv.exe
 if not exist "%mpv_path%" call :die "mpv.exe not found"
 
-:: Get mpv-document.ico location
+:: Get mpv-icon.ico location
 set icon_path=%~dp0mpv-icon.ico
-if not exist "%icon_path%" call :die "mpv-document.ico not found"
+if not exist "%icon_path%" call :die "mpv-icon.ico not found"
 
 :: Register mpv.exe under the "App Paths" key, so it can be found by
 :: ShellExecute, the run command, the start menu, etc.
