@@ -206,10 +206,10 @@ function Check-ChannelRelease {
     else {
         $result = Read-KeyOrTimeout "Choose mpv updates frequency, weekly or daily? [1=weekly/2=daily] (default=1)" "D1"
         Write-Host ""
-        if ($channel -eq 'D1') {
+        if ($result -eq 'D1') {
             $channel = "weekly"
         }
-        elseif (($result -eq 'D2')) {
+        elseif ($result -eq 'D2') {
             $channel = "daily"
         }
     }
@@ -264,8 +264,8 @@ function Upgrade-Mpv {
                 Write-Host "Detecting System Type is 32-bit" -ForegroundColor Green
                 $arch = "i686"
             }
+            $channel = Check-ChannelRelease
             $remoteName, $download_link = Get-Latest-Mpv $arch $channel
-
         }
         else {
             $need_download = $false
