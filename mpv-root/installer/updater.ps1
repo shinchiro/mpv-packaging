@@ -81,6 +81,7 @@ function Extract-Mpv ($file) {
     Write-Host "Extracting" $file -ForegroundColor Green
     & $7za x -y $file
 }
+
 function Get-Latest-Mpv($Arch, $channel) {
     $filename = ""
     $download_link = ""
@@ -195,15 +196,20 @@ function Test-Admin
     (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
+function Create-XML {
+@"
+<settings>
+  <channel>unset</channel>
+  <autodelete>unset</autodelete>
+</settings>
+"@ | Set-Content "settings.xml" -Encoding UTF8
+}
+
 function Check-ChannelRelease {
     $channel = ""
-    if (Test-Path weekly) {
-        $channel = "weekly"
-    }
-    elseif (Test-Path daily) {
-        $channel = "daily"
-    }
-    else {
+    $file = "settings.xml"
+
+    if (-not (Test-Path $file)) {
         $result = Read-KeyOrTimeout "Choose mpv updates frequency, weekly or daily? [1=weekly/2=daily] (default=1)" "D1"
         Write-Host ""
         if ($result -eq 'D1') {
@@ -212,9 +218,42 @@ function Check-ChannelRelease {
         elseif ($result -eq 'D2') {
             $channel = "daily"
         }
+        Create-XML
+        [xml]$doc = Get-Content $file
+        $doc.settings.channel = $channel
+        $doc.Save($file)
     }
-    New-Item -Force $channel
+    else {
+        [xml]$doc = Get-Content $file
+        $channel = $doc.settings.channel
+    }
     return $channel
+}
+
+function Check-Autodelete($archive) {
+    $autodelete = ""
+    $file = "settings.xml"
+
+    if (-not (Test-Path $file)) { exit }
+    [xml]$doc = Get-Content $file
+    if ($doc.settings.autodelete -eq "unset") {
+        $result = Read-KeyOrTimeout "Delete mpv archives after extract? [Y/n] (default=Y)" "Y"
+        Write-Host ""
+        if ($result -eq 'Y') {
+            $autodelete = "true"
+        }
+        elseif ($result -eq 'N') {
+            $autodelete = "false"
+        }
+        $doc.settings.autodelete = $autodelete
+        $doc.Save($file)
+    }
+    if ($doc.settings.autodelete -eq "true") {
+        if (Test-Path $archive)
+        {
+            Remove-Item -Force $archive
+        }
+    }
 }
 
 function Upgrade-Mpv {
@@ -277,6 +316,7 @@ function Upgrade-Mpv {
         Check-7z
         Extract-Mpv $remoteName
     }
+    Check-Autodelete $remoteName
 }
 
 function Upgrade-Ytplugin {
