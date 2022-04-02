@@ -1,6 +1,6 @@
 function Check-7z {
     $7zdir = (Get-Location).Path + "\7z"
-    if (-not (Test-Path ($7zdir + "\7za.exe")))
+    if (-not (Test-Path ($7zdir + "\7za.exe")) -and -not (Test-Path ([Environment]::ExpandEnvironmentVariables("%Programfiles%\7-Zip\7z.exe"))))
     {
         $download_file = (Get-Location).Path + "\7z.zip"
         Write-Host "Downloading 7z" -ForegroundColor Green
@@ -77,9 +77,14 @@ function Download-Ytplugin ($plugin, $version) {
 }
 
 function Extract-Mpv ($file) {
-    $7za = (Get-Location).Path + "\7z\7za.exe"
-    Write-Host "Extracting" $file -ForegroundColor Green
-    & $7za x -y $file
+    if (Test-Path ([Environment]::ExpandEnvironmentVariables("%Programfiles%\7-Zip\7z.exe"))) {
+        & ([Environment]::ExpandEnvironmentVariables("%Programfiles%\7-Zip\7z.exe")) x -y $file | FIND "Extracting archive" | Write-Host -ForegroundColor Green
+    }
+    else {
+        $7za = (Get-Location).Path + "\7z\7za.exe"
+        Write-Host "Extracting" $file -ForegroundColor Green
+        & $7za x -y $file
+    }
 }
 
 function Get-Latest-Mpv($Arch, $channel) {
