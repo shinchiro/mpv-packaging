@@ -46,7 +46,7 @@ function Check-Mpv {
     return $is_exist
 }
 
-function Download-Mpv ($filename, $link) {
+function Download-Archive ($filename, $link) {
     Write-Host "Downloading" $filename -ForegroundColor Green
     $global:progressPreference = 'Continue'
     Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $filename
@@ -76,7 +76,7 @@ function Download-Ytplugin ($plugin, $version) {
     Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $plugin_exe
 }
 
-function Extract-Mpv ($file) {
+function Extract-Archive ($file) {
     if (Test-Path ([Environment]::ExpandEnvironmentVariables("%Programfiles%\7-Zip\7z.exe"))) {
         & ([Environment]::ExpandEnvironmentVariables("%Programfiles%\7-Zip\7z.exe")) x -y $file | FIND "Extracting archive" | Write-Host -ForegroundColor Green
     }
@@ -138,6 +138,14 @@ function Get-Latest-Ytplugin ($plugin) {
             return $version
         }
     }
+}
+
+function Get-Latest-FFmpeg ($Arch) {
+    $api_gh = "https://api.github.com/repos/shinchiro/mpv-winbuild-cmake/releases/latest"
+    $json = Invoke-WebRequest $api_gh -MaximumRedirection 0 -ErrorAction Ignore -UseBasicParsing | ConvertFrom-Json
+    $filename = $json.assets | where { $_.name -Match "ffmpeg-$Arch" } | Select-Object -ExpandProperty name
+    $download_link = $json.assets | where { $_.name -Match "ffmpeg-$Arch" } | Select-Object -ExpandProperty browser_download_url
+    return $filename, $download_link
 }
 
 function Get-Arch {
@@ -206,6 +214,7 @@ function Create-XML {
 <settings>
   <channel>unset</channel>
   <autodelete>unset</autodelete>
+  <getffmpeg>unset</getffmpeg>
 </settings>
 "@ | Set-Content "settings.xml" -Encoding UTF8
 }
@@ -242,7 +251,7 @@ function Check-Autodelete($archive) {
     if (-not (Test-Path $file)) { exit }
     [xml]$doc = Get-Content $file
     if ($doc.settings.autodelete -eq "unset") {
-        $result = Read-KeyOrTimeout "Delete mpv archives after extract? [Y/n] (default=Y)" "Y"
+        $result = Read-KeyOrTimeout "Delete archives after extract? [Y/n] (default=Y)" "Y"
         Write-Host ""
         if ($result -eq 'Y') {
             $autodelete = "true"
@@ -259,6 +268,31 @@ function Check-Autodelete($archive) {
             Remove-Item -Force $archive
         }
     }
+}
+
+function Check-GetFFmpeg() {
+    $get_ffmpeg = ""
+    $file = "settings.xml"
+
+    if (-not (Test-Path $file)) { exit }
+    [xml]$doc = Get-Content $file
+    if ($doc.settings.getffmpeg -eq "unset") {
+        Write-Host "FFmpeg doesn't exist. " -ForegroundColor Green -NoNewline
+        $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=n)" "N"
+        Write-Host ""
+        if ($result -eq 'Y') {
+            $get_ffmpeg = "true"
+        }
+        elseif ($result -eq 'N') {
+            $get_ffmpeg = "false"
+        }
+        $doc.settings.getffmpeg = $get_ffmpeg
+        $doc.Save($file)
+    }
+    else {
+        $get_ffmpeg = $doc.settings.getffmpeg
+    }
+    return $get_ffmpeg
 }
 
 function Upgrade-Mpv {
@@ -317,9 +351,9 @@ function Upgrade-Mpv {
     }
 
     if ($need_download) {
-        Download-Mpv $remoteName $download_link
+        Download-Archive $remoteName $download_link
         Check-7z
-        Extract-Mpv $remoteName
+        Extract-Archive $remoteName
     }
     Check-Autodelete $remoteName
 }
@@ -354,6 +388,54 @@ function Upgrade-Ytplugin {
             }
         }
     }
+}
+
+function Upgrade-FFmpeg {
+    $get_ffmpeg = Check-GetFFmpeg
+    if ($get_ffmpeg -eq "false") {
+        exit
+    }
+
+    if (Test-Path (Join-Path $env:windir "SysWow64")) {
+        $arch = "x86_64"
+    }
+    else {
+        $arch = "i686"
+    }
+
+    $need_download = $false
+    $remote_name, $download_link = Get-Latest-FFmpeg $arch
+    $ffmpeg = (Get-Location).Path + "\ffmpeg.exe"
+    $ffmpeg_exist = Test-Path $ffmpeg
+
+    if ($ffmpeg_exist) {
+        $ffmpeg_file = .\ffmpeg -version | select-string "ffmpeg" | select-object -First 1
+        $file_pattern = "git-[0-9-]+([a-z0-9-]{8})"
+        $url_pattern = "git-([a-z0-9-]{8})"
+        $bool = $ffmpeg_file -match $file_pattern
+        $local_git = $matches[1]
+        $bool = $remote_name -match $url_pattern
+        $remote_git = $matches[1]
+
+        if ($local_git -match $remote_git) {
+            Write-Host "You are already using latest ffmpeg build -- $remote_name" -ForegroundColor Green
+            $need_download = $false
+        }
+        else {
+            Write-Host "Newer ffmpeg build available" -ForegroundColor Green
+            $need_download = $true
+        }
+    }
+    else {
+        $need_download = $true
+    }
+
+    if ($need_download) {
+        Download-Archive $remote_name $download_link
+        Check-7z
+        Extract-Archive $remote_name
+    }
+    Check-Autodelete $remote_name
 }
 
 function Read-KeyOrTimeout ($prompt, $key){
@@ -403,6 +485,7 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Upgrade-Mpv
     Upgrade-Ytplugin
+    Upgrade-FFmpeg
     Write-Host "Operation completed" -ForegroundColor Magenta
 }
 catch [System.Exception] {
