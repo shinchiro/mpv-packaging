@@ -232,6 +232,9 @@ function Check-ChannelRelease {
         elseif ($result -eq 'D2') {
             $channel = "daily"
         }
+        else {
+            throw "Please enter valid input key."
+        }
         Create-XML
         [xml]$doc = Get-Content $file
         $doc.settings.channel = $channel
@@ -259,6 +262,9 @@ function Check-Autodelete($archive) {
         elseif ($result -eq 'N') {
             $autodelete = "false"
         }
+        else {
+            throw "Please enter valid input key."
+        }
         $doc.settings.autodelete = $autodelete
         $doc.Save($file)
     }
@@ -285,6 +291,9 @@ function Check-GetFFmpeg() {
         }
         elseif ($result -eq 'N') {
             $get_ffmpeg = "false"
+        }
+        else {
+            throw "Please enter valid input key."
         }
         $doc.settings.getffmpeg = $get_ffmpeg
         $doc.Save($file)
@@ -332,7 +341,7 @@ function Upgrade-Mpv {
         $result = Read-KeyOrTimeout "Proceed with downloading? [Y/n] (default=y)" "Y"
         Write-Host ""
 
-        if ($result -eq "Y") {
+        if ($result -eq 'Y') {
             $need_download = $true
             if (Test-Path (Join-Path $env:windir "SysWow64")) {
                 Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
@@ -345,8 +354,11 @@ function Upgrade-Mpv {
             $channel = Check-ChannelRelease
             $remoteName, $download_link = Get-Latest-Mpv $arch $channel
         }
-        else {
+        elseif ($result -eq 'N') {
             $need_download = $false
+        }
+        else {
+            throw "Please enter valid input key."
         }
     }
 
@@ -382,9 +394,12 @@ function Upgrade-Ytplugin {
                 $latest_release = Get-Latest-Ytplugin "yt-dlp"
                 Download-Ytplugin "yt-dlp" $latest_release
             }
-            elseif (($result_exe -eq 'D2')) {
+            elseif ($result_exe -eq 'D2') {
                 $latest_release = Get-Latest-Ytplugin "youtube-dl"
                 Download-Ytplugin "youtube-dl" $latest_release
+            }
+            else {
+                throw "Please enter valid input key."
             }
         }
     }
