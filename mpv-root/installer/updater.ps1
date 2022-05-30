@@ -48,7 +48,6 @@ function Check-Mpv {
 
 function Download-Archive ($filename, $link) {
     Write-Host "Downloading" $filename -ForegroundColor Green
-    $global:progressPreference = 'Continue'
     Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $filename
 }
 
@@ -58,7 +57,6 @@ function Download-Ytplugin ($plugin, $version) {
     switch -wildcard ($plugin) {
         "yt-dlp*" {
             Write-Host "Downloading $plugin ($version)" -ForegroundColor Green
-            $global:progressPreference = 'Continue'
             $32bit = ""
             if (-Not (Test-Path (Join-Path $env:windir "SysWow64"))) {
                 $32bit = "_x86"
@@ -68,7 +66,6 @@ function Download-Ytplugin ($plugin, $version) {
         }
         "youtube-dl" {
             Write-Host "Downloading $plugin ($version)" -ForegroundColor Green
-            $global:progressPreference = 'Continue'
             $link = -join("https://yt-dl.org/downloads/", $version, "/youtube-dl.exe")
             $plugin_exe = "youtube-dl.exe"
         }
@@ -122,7 +119,6 @@ function Get-Latest-Ytplugin ($plugin) {
         "yt-dlp*" {
             $link = "https://github.com/yt-dlp/yt-dlp/releases.atom"
             Write-Host "Fetching RSS feed for ytp-dlp" -ForegroundColor Green
-            $global:progressPreference = 'silentlyContinue'
             $resp = [xml](Invoke-WebRequest $link -MaximumRedirection 0 -ErrorAction Ignore -UseBasicParsing).Content
             $link = $resp.feed.entry[0].link.href
             $version = $link.split("/")[-1]
@@ -131,7 +127,6 @@ function Get-Latest-Ytplugin ($plugin) {
         "youtube-dl" {
             $link = "https://yt-dl.org/downloads/latest/youtube-dl.exe"
             Write-Host "Fetching RSS feed for youtube-dl" -ForegroundColor Green
-            $global:progressPreference = 'silentlyContinue'
             $resp = Invoke-WebRequest $link -MaximumRedirection 0 -ErrorAction Ignore -UseBasicParsing
             $redirect_link = $resp.Headers.Location
             $version = $redirect_link.split("/")[4]
@@ -498,6 +493,7 @@ try {
     Check-PowershellVersion
     # Sourceforge only support TLS 1.2
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $global:progressPreference = 'silentlyContinue'
     Upgrade-Mpv
     Upgrade-Ytplugin
     Upgrade-FFmpeg
