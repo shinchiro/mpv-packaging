@@ -276,6 +276,9 @@ function Check-GetFFmpeg() {
     $file = "settings.xml"
 
     if (-not (Test-Path $file)) { exit }
+    if (Test-Path "ffmpeg.exe") {
+        return "true"
+    }
     [xml]$doc = Get-Content $file
     if ($doc.settings.getffmpeg -eq "unset") {
         Write-Host "FFmpeg doesn't exist. " -ForegroundColor Green -NoNewline
