@@ -1,18 +1,15 @@
 function Check-7z {
     $7zdir = (Get-Location).Path + "\7z"
-    if (-not (Test-Path ($7zdir + "\7za.exe")))
+    if (-not (Test-Path ($7zdir + "\7zr.exe")))
     {
-        $download_file = (Get-Location).Path + "\7z.zip"
-        Write-Host "Downloading 7z" -ForegroundColor Green
-        Invoke-WebRequest -Uri "https://download.sourceforge.net/sevenzip/7za920.zip" -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $download_file
-        Write-Host "Extracting 7z" -ForegroundColor Green
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($download_file, $7zdir)
-        Remove-Item -Force $download_file
+        $null = New-Item -ItemType Directory -Force $7zdir
+        $download_file = $7zdir + "\7zr.exe"
+        Write-Host "Downloading 7zr.exe" -ForegroundColor Green
+        Invoke-WebRequest -Uri "https://www.7-zip.org/a/7zr.exe" -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $download_file
     }
     else
     {
-        Write-Host "7z already exist. Skipped download" -ForegroundColor Green
+        Write-Host "7zr already exist. Skipped download" -ForegroundColor Green
     }
 }
 
@@ -74,9 +71,9 @@ function Download-Ytplugin ($plugin, $version) {
 }
 
 function Extract-Archive ($file) {
-    $7za = (Get-Location).Path + "\7z\7za.exe"
+    $7zr = (Get-Location).Path + "\7z\7zr.exe"
     Write-Host "Extracting" $file -ForegroundColor Green
-    & $7za x -y $file
+    & $7zr x -y $file
 }
 
 function Get-Latest-Mpv($Arch, $channel) {
