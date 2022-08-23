@@ -94,6 +94,7 @@ function Get-Latest-Mpv($Arch, $channel) {
             {
                 i686 { $rss_link = $i686_link}
                 x86_64 { $rss_link = $x86_64_link }
+                x86_64-v3 { $rss_link = $x86_64_link }
             }
             Write-Host "Fetching RSS feed for mpv" -ForegroundColor Green
             $result = [xml](New-Object System.Net.WebClient).DownloadString($rss_link)
@@ -103,7 +104,12 @@ function Get-Latest-Mpv($Arch, $channel) {
             $download_link = "https://download.sourceforge.net/mpv-player-windows/" + $filename
         }
     }
-    return $filename, $download_link
+    if ($filename -is [array]) {
+        return $filename[0], $download_link[0]
+    }
+    else {
+        return $filename, $download_link
+    }
 }
 
 function Get-Latest-Ytplugin ($plugin) {
@@ -132,7 +138,12 @@ function Get-Latest-FFmpeg ($Arch) {
     $json = Invoke-WebRequest $api_gh -MaximumRedirection 0 -ErrorAction Ignore -UseBasicParsing | ConvertFrom-Json
     $filename = $json.assets | where { $_.name -Match "ffmpeg-$Arch" } | Select-Object -ExpandProperty name
     $download_link = $json.assets | where { $_.name -Match "ffmpeg-$Arch" } | Select-Object -ExpandProperty browser_download_url
-    return $filename, $download_link
+    if ($filename -is [array]) {
+        return $filename[0], $download_link[0]
+    }
+    else {
+        return $filename, $download_link
+    }
 }
 
 function Get-Arch {
@@ -185,7 +196,7 @@ function ExtractDateFromFile {
 }
 
 function ExtractDateFromURL($filename) {
-    $pattern = "mpv-[xi864_]*-([0-9]{8})-git-([a-z0-9-]{7})"
+    $pattern = "mpv-[xi864_].*-([0-9]{8})-git-([a-z0-9-]{7})"
     $bool = $filename -match $pattern
     return $matches[1]
 }
@@ -200,6 +211,7 @@ function Create-XML {
 @"
 <settings>
   <channel>unset</channel>
+  <arch>unset</arch>
   <autodelete>unset</autodelete>
   <getffmpeg>unset</getffmpeg>
 </settings>
@@ -232,6 +244,38 @@ function Check-ChannelRelease {
         $channel = $doc.settings.channel
     }
     return $channel
+}
+
+function Check-Arch($arch) {
+    $get_arch = ""
+    $file = "settings.xml"
+
+    if (-not (Test-Path $file)) { exit }
+    [xml]$doc = Get-Content $file
+    if ($doc.settings.arch -eq "unset") {
+        if ($arch -eq "i686") {
+            $get_arch = "i686"
+        }
+        else {
+            $result = Read-KeyOrTimeout "Choose variant for 64bit builds: x86_64 or x86_64-v3 (for cpu with AVX2 support) [1=x86_64 / 2=x86_64-v3 (default=1)" "D1"
+            Write-Host ""
+            if ($result -eq 'D1') {
+                $get_arch = "x86_64"
+            }
+            elseif ($result -eq 'D2') {
+                $get_arch = "x86_64-v3"
+            }
+            else {
+                throw "Please enter valid input key."
+            }
+        }
+        $doc.settings.arch = $get_arch
+        $doc.Save($file)
+    }
+    else {
+        $get_arch = $doc.settings.arch
+    }
+    return $get_arch
 }
 
 function Check-Autodelete($archive) {
@@ -299,8 +343,9 @@ function Upgrade-Mpv {
     $channel = ""
 
     if (Check-Mpv) {
-        $arch = (Get-Arch).FileType
         $channel = Check-ChannelRelease
+        $file_arch = (Get-Arch).FileType
+        $arch = Check-Arch $file_arch
         $remoteName, $download_link = Get-Latest-Mpv $arch $channel
         $localgit = ExtractGitFromFile
         $localdate = ExtractDateFromFile
@@ -332,13 +377,14 @@ function Upgrade-Mpv {
             $need_download = $true
             if (Test-Path (Join-Path $env:windir "SysWow64")) {
                 Write-Host "Detecting System Type is 64-bit" -ForegroundColor Green
-                $arch = "x86_64"
+                $original_arch = "x86_64"
             }
             else {
                 Write-Host "Detecting System Type is 32-bit" -ForegroundColor Green
-                $arch = "i686"
+                $original_arch = "i686"
             }
             $channel = Check-ChannelRelease
+            $arch = Check-Arch $original_arch
             $remoteName, $download_link = Get-Latest-Mpv $arch $channel
         }
         elseif ($result -eq 'N') {
@@ -399,7 +445,8 @@ function Upgrade-FFmpeg {
     }
 
     if (Test-Path (Join-Path $env:windir "SysWow64")) {
-        $arch = "x86_64"
+        $original_arch = "x86_64"
+        $arch = Check-Arch $original_arch
     }
     else {
         $arch = "i686"
