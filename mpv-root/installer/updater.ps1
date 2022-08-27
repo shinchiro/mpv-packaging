@@ -89,12 +89,13 @@ function Get-Latest-Mpv($Arch, $channel) {
         "weekly" {
             $i686_link = "https://sourceforge.net/projects/mpv-player-windows/rss?path=/32bit"
             $x86_64_link = "https://sourceforge.net/projects/mpv-player-windows/rss?path=/64bit"
+            $x86_64v3_link = "https://sourceforge.net/projects/mpv-player-windows/rss?path=/64bit-v3"
             $rss_link = ''
             switch ($Arch)
             {
                 i686 { $rss_link = $i686_link}
                 x86_64 { $rss_link = $x86_64_link }
-                x86_64-v3 { $rss_link = $x86_64_link }
+                x86_64-v3 { $rss_link = $x86_64v3_link }
             }
             Write-Host "Fetching RSS feed for mpv" -ForegroundColor Green
             $result = [xml](New-Object System.Net.WebClient).DownloadString($rss_link)
