@@ -460,8 +460,8 @@ function Upgrade-FFmpeg {
 
     if ($ffmpeg_exist) {
         $ffmpeg_file = .\ffmpeg -version | select-string "ffmpeg" | select-object -First 1
-        $file_pattern = "git-[0-9]{4}-[0-9]{2}-[0-9]{2}-([a-z0-9-]+)"
-        $url_pattern = "git-([a-z0-9-]+)"
+        $file_pattern = "git-[0-9]{4}-[0-9]{2}-[0-9]{2}-([a-z0-9]+)"
+        $url_pattern = "git-([a-z0-9]+)"
         $bool = $ffmpeg_file -match $file_pattern
         $local_git = $matches[1]
         $bool = $remote_name -match $url_pattern
