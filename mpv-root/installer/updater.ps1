@@ -172,6 +172,7 @@ function Get-Arch {
         0x8664 { $result.FileType = 'x86_64' } # 64bit
     }
 
+    $stream.Close()
     $result
 }
 
