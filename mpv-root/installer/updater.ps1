@@ -1,15 +1,31 @@
+$fallback7z = Join-Path (Get-Location) "\7z\7zr.exe";
+
+function Get-7z {
+    $7z_command = Get-Command -CommandType Application -ErrorAction Ignore 7z.exe
+    if ($7z_command) {
+        return $7z_command.Source
+    }
+    $7zdir = Get-ItemPropertyValue -ErrorAction Ignore "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\7-Zip" "InstallLocation"
+    if ($7zdir -and (Test-Path (Join-Path $7zdir "7z.exe"))) {
+        return Join-Path $7zdir "7z.exe"
+    }
+    if (Test-Path $fallback7z) {
+        return $fallback7z
+    }
+    return $null
+}
+
 function Check-7z {
-    $7zdir = (Get-Location).Path + "\7z"
-    if (-not (Test-Path ($7zdir + "\7zr.exe")))
+    if (-not (Get-7z))
     {
-        $null = New-Item -ItemType Directory -Force $7zdir
-        $download_file = $7zdir + "\7zr.exe"
+        $null = New-Item -ItemType Directory -Force (Split-Path $fallback7z)
+        $download_file = $fallback7z
         Write-Host "Downloading 7zr.exe" -ForegroundColor Green
         Invoke-WebRequest -Uri "https://www.7-zip.org/a/7zr.exe" -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $download_file
     }
     else
     {
-        Write-Host "7zr already exist. Skipped download" -ForegroundColor Green
+        Write-Host "7z already exist. Skipped download" -ForegroundColor Green
     }
 }
 
@@ -71,9 +87,9 @@ function Download-Ytplugin ($plugin, $version) {
 }
 
 function Extract-Archive ($file) {
-    $7zr = (Get-Location).Path + "\7z\7zr.exe"
+    $7z = Get-7z
     Write-Host "Extracting" $file -ForegroundColor Green
-    & $7zr x -y $file
+    & $7z x -y $file
 }
 
 function Get-Latest-Mpv($Arch, $channel) {
