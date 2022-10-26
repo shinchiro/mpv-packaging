@@ -37,6 +37,10 @@ function Check-Ytplugin {
     }
 }
 
+function Check-Ytplugin-In-System {
+    return [bool]((Get-Command -CommandType Application -ErrorAction Ignore yt-dlp.exe) -or (Get-Command -CommandType Application -ErrorAction Ignore youtube-dl.exe))
+}
+
 function Check-Mpv {
     $mpv = (Get-Location).Path + "\mpv.exe"
     $is_exist = Test-Path $mpv
@@ -406,6 +410,10 @@ function Upgrade-Mpv {
 }
 
 function Upgrade-Ytplugin {
+    if (Check-Ytplugin-In-System) {
+        Write-Host "yt-dlp.exe or youtube-dl.exe already exists in your system, skip the update check." -ForegroundColor Green
+        exit
+    }
     $yt = Check-Ytplugin
     if ($yt) {
         $latest_release = Get-Latest-Ytplugin((Get-Item $yt).BaseName)
