@@ -1,7 +1,7 @@
 $fallback7z = Join-Path (Get-Location) "\7z\7zr.exe";
 
 function Get-7z {
-    $7z_command = Get-Command -CommandType Application -ErrorAction Ignore 7z.exe
+    $7z_command = Get-Command -CommandType Application -ErrorAction Ignore 7z.exe | Select-Object -Last 1
     if ($7z_command) {
         return $7z_command.Source
     }
@@ -54,7 +54,11 @@ function Check-Ytplugin {
 }
 
 function Check-Ytplugin-In-System {
-    return [bool]((Get-Command -CommandType Application -ErrorAction Ignore yt-dlp.exe) -or (Get-Command -CommandType Application -ErrorAction Ignore youtube-dl.exe))
+    $ytp = Get-Command -CommandType Application -ErrorAction Ignore yt-dlp.exe | Select-Object -Last 1
+    if (-not $ytp) {
+        $ytp = Get-Command -CommandType Application -ErrorAction Ignore youtube-dl.exe | Select-Object -Last 1
+    }
+    return [bool]($ytp -and ((Split-Path $ytp.Source) -ne (Get-Location)))
 }
 
 function Check-Mpv {
@@ -428,7 +432,7 @@ function Upgrade-Mpv {
 function Upgrade-Ytplugin {
     if (Check-Ytplugin-In-System) {
         Write-Host "yt-dlp.exe or youtube-dl.exe already exists in your system, skip the update check." -ForegroundColor Green
-        exit
+        return
     }
     $yt = Check-Ytplugin
     if ($yt) {
@@ -467,7 +471,7 @@ function Upgrade-Ytplugin {
 function Upgrade-FFmpeg {
     $get_ffmpeg = Check-GetFFmpeg
     if ($get_ffmpeg -eq "false") {
-        exit
+        return
     }
 
     if (Test-Path (Join-Path $env:windir "SysWow64")) {
