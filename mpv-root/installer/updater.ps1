@@ -69,7 +69,10 @@ function Check-Mpv {
 
 function Download-Archive ($filename, $link) {
     Write-Host "Downloading" $filename -ForegroundColor Green
-    Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $filename
+    & {
+        $global:progressPreference = 'Continue'
+        Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $filename
+    }
 }
 
 function Download-Ytplugin ($plugin, $version) {
@@ -91,7 +94,10 @@ function Download-Ytplugin ($plugin, $version) {
             $plugin_exe = "youtube-dl.exe"
         }
     }
-    Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $plugin_exe
+    & {
+        $global:progressPreference = 'Continue'
+        Invoke-WebRequest -Uri $link -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox -OutFile $plugin_exe
+    }
 }
 
 function Extract-Archive ($file) {
