@@ -492,6 +492,10 @@ function Upgrade-FFmpeg {
         $file_pattern = "git-[0-9]{4}-[0-9]{2}-[0-9]{2}-([a-z0-9]+)"
         $url_pattern = "git-([a-z0-9]+)"
         $bool = $ffmpeg_file -match $file_pattern
+        if (-not $matches) {
+            Write-Host "Your ffmpeg is manually downloaded and will not be upgraded by this program." -ForegroundColor Green
+            return
+        }
         $local_git = $matches[1]
         $bool = $remote_name -match $url_pattern
         $remote_git = $matches[1]
