@@ -489,12 +489,14 @@ function Upgrade-FFmpeg {
 
     if ($ffmpeg_exist) {
         $ffmpeg_file = .\ffmpeg -version | select-string "ffmpeg" | select-object -First 1
-        $file_pattern = "git-[0-9]{4}-[0-9]{2}-[0-9]{2}-([a-z0-9]+)"
+        $file_pattern_1 = "git-[0-9]{4}-[0-9]{2}-[0-9]{2}-(?<commit>[a-z0-9]+)" # git-2023-01-02-cc2b1a325
+        $file_pattern_2 = "N-\d+-g(?<commit>[a-z0-9]+)"                         # N-109751-g9a820ec8b
+        $file_pattern = $file_pattern_1, $file_pattern_2 -join '|'
         $url_pattern = "git-([a-z0-9]+)"
-        $bool = $ffmpeg_file -match $file_pattern
-        $local_git = $matches[1]
-        $bool = $remote_name -match $url_pattern
-        $remote_git = $matches[1]
+        $file_match= [Regex]::Matches($ffmpeg_file, $file_pattern)
+        $remote_match = [Regex]::Matches($remote_name, $url_pattern)
+        $local_git = $file_match[0].groups['commit'].value
+        $remote_git = $remote_match[0].groups[1].value
 
         if ($local_git -match $remote_git) {
             Write-Host "You are already using latest ffmpeg build -- $remote_name" -ForegroundColor Green
