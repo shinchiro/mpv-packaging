@@ -1,4 +1,5 @@
 $fallback7z = Join-Path (Get-Location) "\7z\7zr.exe";
+$useragent = "mpv-win-updater"
 
 function Get-7z {
     $7z_command = Get-Command -CommandType Application -ErrorAction Ignore 7z.exe | Select-Object -Last 1
@@ -21,7 +22,7 @@ function Check-7z {
         $null = New-Item -ItemType Directory -Force (Split-Path $fallback7z)
         $download_file = $fallback7z
         Write-Host "Downloading 7zr.exe" -ForegroundColor Green
-        Invoke-WebRequest -Uri "https://www.7-zip.org/a/7zr.exe" -UserAgent $([Microsoft.PowerShell.Commands.PSUserAgent]::FireFox) -OutFile $download_file
+        Invoke-WebRequest -Uri "https://www.7-zip.org/a/7zr.exe" -UserAgent $useragent -OutFile $download_file
     }
     else
     {
@@ -69,7 +70,7 @@ function Check-Mpv {
 
 function Download-Archive ($filename, $link) {
     Write-Host "Downloading" $filename -ForegroundColor Green
-    Invoke-WebRequest -Uri $link -UserAgent $([Microsoft.PowerShell.Commands.PSUserAgent]::FireFox) -OutFile $filename
+    Invoke-WebRequest -Uri $link -UserAgent $useragent -OutFile $filename
 }
 
 function Download-Ytplugin ($plugin, $version) {
@@ -91,7 +92,7 @@ function Download-Ytplugin ($plugin, $version) {
             $plugin_exe = "youtube-dl.exe"
         }
     }
-    Invoke-WebRequest -Uri $link -UserAgent $([Microsoft.PowerShell.Commands.PSUserAgent]::FireFox) -OutFile $plugin_exe
+    Invoke-WebRequest -Uri $link -UserAgent $useragent -OutFile $plugin_exe
 }
 
 function Extract-Archive ($file) {
