@@ -174,6 +174,9 @@ call :add_type ""                                 "audio" "CUE Sheet"           
 :: Register "Default Programs" entry
 call :reg add "HKLM\SOFTWARE\RegisteredApplications" /v "mpv" /d "SOFTWARE\Clients\Media\mpv\Capabilities" /f
 
+:: Enable long paths in Windows 10
+call :reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v "LongPathsEnabled" /t REG_DWORD /d 1 /f
+
 :: Add start menu link
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%ProgramData%\Microsoft\Windows\Start Menu\Programs\mpv.lnk');$s.TargetPath='%mpv_path%';$s.Save()"
 
