@@ -17,7 +17,8 @@ function Get-7z {
 }
 
 function Check-7z {
-    if (-not (Get-7z))
+    $7z = Get-7z
+    if (-not ($7z))
     {
         $null = New-Item -ItemType Directory -Force (Split-Path $fallback7z)
         $download_file = $fallback7z
@@ -26,6 +27,7 @@ function Check-7z {
     }
     else
     {
+        Write-Host "7z detected: $7z" -ForegroundColor Blue
         Write-Host "7z already exist. Skipped download" -ForegroundColor Green
     }
 }
@@ -59,7 +61,10 @@ function Check-Ytplugin-In-System {
     if (-not $ytp) {
         $ytp = Get-Command -CommandType Application -ErrorAction Ignore youtube-dl.exe | Select-Object -Last 1
     }
-    return [bool]($ytp -and ((Split-Path $ytp.Source) -ne (Get-Location)))
+    if ($ytp -and (Split-Path $ytp.Source) -eq (Get-Location)) {
+        return $null
+    }
+    return $ytp.Source
 }
 
 function Check-Mpv {
@@ -431,7 +436,9 @@ function Upgrade-Mpv {
 }
 
 function Upgrade-Ytplugin {
-    if (Check-Ytplugin-In-System) {
+    $ytp = Check-Ytplugin-In-System
+    if ($ytp) {
+        Write-Host "ytp detected: $ytp" -ForegroundColor Blue
         Write-Host "yt-dlp.exe or youtube-dl.exe already exists in your system, skip the update check." -ForegroundColor Green
         return
     }
@@ -560,6 +567,8 @@ if (Test-Admin) {
 else {
     Write-Host "Running script without administrator privileges" -ForegroundColor Red
 }
+
+Write-Host "mpv path: $(Get-Location)" -ForegroundColor Blue
 
 try {
     Check-PowershellVersion
