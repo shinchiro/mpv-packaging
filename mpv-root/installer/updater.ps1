@@ -142,7 +142,7 @@ function Get-Latest-Ytplugin ($plugin) {
     switch -wildcard ($plugin) {
         "yt-dlp*" {
             $link = "https://github.com/yt-dlp/yt-dlp/releases.atom"
-            Write-Host "Fetching RSS feed for ytp-dlp" -ForegroundColor Green
+            Write-Host "Fetching RSS feed for yt-dlp" -ForegroundColor Green
             $resp = [xml](Invoke-WebRequest $link -MaximumRedirection 0 -ErrorAction Ignore -UseBasicParsing).Content
             $link = $resp.feed.entry[0].link.href
             $version = $link.split("/")[-1]
